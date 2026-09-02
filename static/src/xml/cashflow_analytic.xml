@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="havano_cashflow_analytic.CashFlowAnalyticReport" owl="1">
+        <div class="o_action o_view_controller o_cashflow_analytic_page">
+            <div class="o_cp_controller">
+                <div class="o_control_panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        
+                        <!-- LEFT (TITLE & EXPORT) -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button type="button" class="btn o_report_btn o_report_btn_primary" onclick="window.print()">
+                                <i class="fa fa-print me-1"></i> Print / PDF
+                            </button>
+                            <h1 class="o_cashflow_title">
+                                Cash Flow by Analytic Account
+                            </h1>
+                        </div>
+
+                        <!-- RIGHT (FILTERS) -->
+                        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                            
+                            <!-- Date Filter -->
+                            <div class="dropdown">
+                                <button class="btn o_report_btn o_report_btn_filter dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa fa-calendar text-muted"></i>
+                                    <t t-if="this.state.datePreset == 'this_month'">This Month</t>
+                                    <t t-elif="this.state.datePreset == 'this_quarter'">This Quarter</t>
+                                    <t t-elif="this.state.datePreset == 'this_year'">This Year</t>
+                                    <t t-elif="this.state.datePreset == 'last_month'">Last Month</t>
+                                    <t t-elif="this.state.datePreset == 'last_year'">Last Year</t>
+                                    <t t-elif="this.state.datePreset.startsWith('month_')">
+                                        <t t-esc="this.state.months.find(m => m.id === this.state.datePreset)?.name"/>
+                                    </t>
+                                    <t t-elif="this.state.datePreset.startsWith('quarter_')">
+                                        <t t-esc="this.state.quarters.find(q => q.id === this.state.datePreset)?.name"/>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-if="this.state.dateFrom and this.state.dateTo">
+                                            <t t-esc="this.state.dateFrom"/> to <t t-esc="this.state.dateTo"/>
+                                        </t>
+                                        <t t-else="">Custom Date</t>
+                                    </t>
+                                </button>
+                                <div class="dropdown-menu" style="padding: 10px; min-width: 420px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+                                    <div style="display: flex;">
+                                        <div style="flex: 1; border-right: 1px solid #e2e8f0; padding-right: 15px;">
+                                            <div style="font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase;">Presets</div>
+                                            <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset('this_month')" style="padding: 5px 10px; font-size: 13px;"><t t-if="this.state.datePreset == 'this_month'"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t>This Month</a>
+                                            <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset('this_quarter')" style="padding: 5px 10px; font-size: 13px;"><t t-if="this.state.datePreset == 'this_quarter'"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t>This Quarter</a>
+                                            <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset('this_year')" style="padding: 5px 10px; font-size: 13px;"><t t-if="this.state.datePreset == 'this_year'"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t>This Year</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset('last_month')" style="padding: 5px 10px; font-size: 13px;"><t t-if="this.state.datePreset == 'last_month'"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t>Last Month</a>
+                                            <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset('last_year')" style="padding: 5px 10px; font-size: 13px;"><t t-if="this.state.datePreset == 'last_year'"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t>Last Year</a>
+                                        </div>
+                                        
+                                        <div style="flex: 1; border-right: 1px solid #e2e8f0; padding-left: 15px; padding-right: 15px;">
+                                            <div style="font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase;">Months</div>
+                                            <t t-foreach="this.state.months" t-as="month" t-key="month.id">
+                                                <a class="dropdown-item" href="#" t-on-click="() => this.applyPreset(month.id)" style="padding: 2px 10px; font-size: 13px;">
+                                                    <t t-if="this.state.datePreset == month.id"><i class="fa fa-check text-success me-1"></i></t><t t-else=""><span style="margin-right: 18px;"></span></t><t t-esc="month.name"/>
+                                                </a>
+                                            </t>
+                                        </div>
+
+                                        <div style="flex: 1; padding-left: 15px;">
+                                            <div style="font-size: 11px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase;">Custom Range</div>
+                                            <label style="font-size: 11px; color: #64748b;">From:</label>
+                                            <input type="date" class="form-control mb-2" style="font-size: 12px; height: 30px;" t-on-change="(e) => this.state.dateFrom = e.target.value" t-att-value="this.state.dateFrom"/>
+                                            <label style="font-size: 11px; color: #64748b;">To:</label>
+                                            <input type="date" class="form-control mb-3" style="font-size: 12px; height: 30px;" t-on-change="(e) => this.state.dateTo = e.target.value" t-att-value="this.state.dateTo"/>
+                                            <button class="btn btn-primary w-100" style="background-color: #714B67; border-color: #714B67; font-size: 13px; padding: 5px;" t-on-click="onFilterChange">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comparison Filter -->
+                            <div class="dropdown">
+                                <button class="btn o_report_btn o_report_btn_filter dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa fa-percent text-muted"></i> Comparison
+                                </button>
+                                <div class="dropdown-menu" style="padding: 6px 0; min-width: 200px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+                                    <a class="dropdown-item" href="#" t-on-click="() => this.setComparison('none')" style="padding: 6px 15px; font-size: 13px;">
+                                        <t t-if="this.state.comparison == 'none'"><i class="fa fa-check text-success me-2"></i></t><t t-else=""><span style="margin-right: 20px;"></span></t>No Comparison
+                                    </a>
+                                    <a class="dropdown-item" href="#" t-on-click="() => this.setComparison('previous_period')" style="padding: 6px 15px; font-size: 13px;">
+                                        <t t-if="this.state.comparison == 'previous_period'"><i class="fa fa-check text-success me-2"></i></t><t t-else=""><span style="margin-right: 20px;"></span></t>Previous Period
+                                    </a>
+                                    <a class="dropdown-item" href="#" t-on-click="() => this.setComparison('previous_year')" style="padding: 6px 15px; font-size: 13px;">
+                                        <t t-if="this.state.comparison == 'previous_year'"><i class="fa fa-check text-success me-2"></i></t><t t-else=""><span style="margin-right: 20px;"></span></t>Same Period Last Year
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Analytic Account Filter -->
+                            <div class="dropdown">
+                                <button class="btn o_report_btn o_report_btn_filter dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa fa-pie-chart text-muted"></i> Analytic Accounts
+                                </button>
+                                <div class="dropdown-menu" style="padding: 10px; min-width: 240px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">
+                                    <t t-if="this.state.availableAccounts.length === 0">
+                                        <div style="font-size: 12px; color: #94a3b8; padding: 4px;">No Analytic Accounts created yet.</div>
+                                    </t>
+                                    <t t-foreach="this.state.availableAccounts" t-as="acc" t-key="acc.id">
+                                        <a class="dropdown-item" href="#" t-on-click="() => this.toggleAccount(acc.id)" style="padding: 5px 10px; font-size: 13px;">
+                                            <i t-attf-class="fa #{this.state.selectedAccounts.includes(acc.id) ? 'fa-check text-success' : 'fa-fw'} me-2"></i>
+                                            <t t-esc="acc.display_name"/>
+                                        </a>
+                                    </t>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT BODY -->
+            <div class="o_content" style="background-color: #f8f9fa; width: 100%; height: 100%; overflow: auto;">
+                <div style="padding: 24px 16px;">
+                    <div style="width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; background-color: #ffffff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
+                        
+                        <t t-if="this.state.data">
+                            <table class="o_cashflow_table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; min-width: 240px;">Cash Flow Item</th>
+                                        <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                            <th class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                <t t-esc="col"/>
+                                            </th>
+                                        </t>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    <!-- SECTION 1: CASH INFLOWS -->
+                                    <tr class="section_header" style="cursor: pointer;" t-on-click="toggleInflows">
+                                        <td t-att-colspan="this.state.data.columns.length + 1">
+                                            <i t-attf-class="fa #{this.state.inflowsExpanded ? 'fa-caret-down' : 'fa-caret-right'} me-2"></i>
+                                            Cash Inflows (Receipts)
+                                        </td>
+                                    </tr>
+
+                                    <t t-if="this.state.inflowsExpanded">
+                                        <t t-foreach="this.state.data.operating_inflows" t-as="inflow" t-key="inflow.name">
+                                            <tr>
+                                                <td style="padding-left: 28px; color: #475569;">
+                                                    <t t-esc="inflow.name"/>
+                                                </td>
+                                                <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                                    <td class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                        <t t-if="col.includes('(%)')">
+                                                            <t t-esc="this.formatPercent(inflow.values[col])"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <t t-esc="this.formatCurrency(inflow.values[col])"/>
+                                                        </t>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                    </t>
+
+                                    <!-- TOTAL INFLOWS -->
+                                    <tr class="subtotal_row">
+                                        <td style="padding-left: 14px;">Total Cash Inflows</td>
+                                        <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                            <td class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                <t t-if="col.includes('(%)')">
+                                                    <t t-esc="this.formatPercent(this.state.data.total_inflows[col])"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-esc="this.formatCurrency(this.state.data.total_inflows[col])"/>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+
+                                    <!-- SPACER ROW -->
+                                    <tr><td t-att-colspan="this.state.data.columns.length + 1" style="height: 12px; padding: 0;"></td></tr>
+
+                                    <!-- SECTION 2: CASH OUTFLOWS -->
+                                    <tr class="section_header" style="cursor: pointer;" t-on-click="toggleOutflows">
+                                        <td t-att-colspan="this.state.data.columns.length + 1">
+                                            <i t-attf-class="fa #{this.state.outflowsExpanded ? 'fa-caret-down' : 'fa-caret-right'} me-2"></i>
+                                            Cash Outflows (Disbursements &amp; Expenses)
+                                        </td>
+                                    </tr>
+
+                                    <t t-if="this.state.outflowsExpanded">
+                                        <t t-foreach="this.state.data.operating_outflows" t-as="outflow" t-key="outflow.name">
+                                            <tr>
+                                                <td style="padding-left: 28px; color: #475569;">
+                                                    <t t-esc="outflow.name"/>
+                                                </td>
+                                                <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                                    <td class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                        <t t-if="col.includes('(%)')">
+                                                            <t t-esc="this.formatPercent(outflow.values[col])"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <t t-esc="this.formatCurrency(outflow.values[col])"/>
+                                                        </t>
+                                                    </td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                    </t>
+
+                                    <!-- TOTAL OUTFLOWS -->
+                                    <tr class="subtotal_row">
+                                        <td style="padding-left: 14px;">Total Cash Outflows</td>
+                                        <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                            <td class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                <t t-if="col.includes('(%)')">
+                                                    <t t-esc="this.formatPercent(this.state.data.total_outflows[col])"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-esc="this.formatCurrency(this.state.data.total_outflows[col])"/>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+
+                                    <!-- SPACER ROW -->
+                                    <tr><td t-att-colspan="this.state.data.columns.length + 1" style="height: 16px; padding: 0;"></td></tr>
+
+                                    <!-- SECTION 3: NET CASH FLOW -->
+                                    <tr class="net_cashflow_row">
+                                        <td>NET CASH FLOW</td>
+                                        <t t-foreach="this.state.data.columns" t-as="col" t-key="col">
+                                            <td class="text_right" t-att-class="col.includes('(%)') ? 'col_percent' : ''">
+                                                <t t-if="col.includes('(%)')">
+                                                    <t t-esc="this.formatPercent(this.state.data.net_cashflow[col])"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-esc="this.formatCurrency(this.state.data.net_cashflow[col])"/>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <t t-else="">
+                            <div class="text-center text-muted p-5">
+                                <i class="fa fa-spinner fa-spin fa-2x mb-3"></i>
+                                <p>Loading Cash Flow by Analytic Account...</p>
+                            </div>
+                        </t>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
