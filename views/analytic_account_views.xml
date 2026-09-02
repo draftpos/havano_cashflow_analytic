@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Analytic Account List View -->
+    <record id="view_havano_analytic_account_tree" model="ir.ui.view">
+        <field name="name">havano.analytic.account.list</field>
+        <field name="model">havano.analytic.account</field>
+        <field name="arch" type="xml">
+            <list string="Analytic Accounts">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Analytic Account Form View -->
+    <record id="view_havano_analytic_account_form" model="ir.ui.view">
+        <field name="name">havano.analytic.account.form</field>
+        <field name="model">havano.analytic.account</field>
+        <field name="arch" type="xml">
+            <form string="Analytic Account">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Analytic Account Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Sales Department / Project Alpha / Bulawayo Branch"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" placeholder="e.g. CC-101"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Internal notes or description for this analytic account..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Analytic Account Action -->
+    <record id="action_havano_analytic_account" model="ir.actions.act_window">
+        <field name="name">Analytic Accounts</field>
+        <field name="res_model">havano.analytic.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Analytic Account
+            </p>
+            <p>
+                Analytic Accounts help you tag and categorize sales, expenses, and payments to analyze Cash Flow by department, project, or branch.
+            </p>
+        </field>
+    </record>
+</odoo>
